@@ -1,42 +1,42 @@
 import re
-from abc import ABC
 
-from config import translates
+from data_struct import Log
 
 
+# 用于解析多个tag  例子参考 BluetoothTranslator
 class TagsTranslator(object):
-    def __init__(self, tag_translators=translates):
-        self.tags = dict()
-        for tag_translator in tag_translators:
-            self.tags[tag_translator.tag()] = tag_translator
+    def __init__(self, tag_translators):
+        self.tag_translators = tag_translators
 
     def translate(self, tag, msg):
-        if self.tags:
-            return self.tags[tag](msg)
+        if tag in self.tag_translators:
+            translator = self.tag_translators[tag]
+            return translator(msg)
         return None
 
 
-class TagTranslator(ABC):
+# 只解析一个tag
+class TagTranslator(TagsTranslator):
+    def __init__(self):
+        super().__init__({self.tag(): self})
+
     def tag(self):
         pass
 
-    def translate(self, msg):
-        pass
-
-
-class TranslateTags(object):
-    def __init__(self, tags={}):
-        self.tags = {}
-
     def translate(self, tag, msg):
-        translator = self.tags[tag]
-        if translator:
-            return translator.tagTranslator(msg)
-        return None
+        return Log(translated=msg)
+
+
+class DemoTagTranslator(TagTranslator):
+    def tag(self):
+        return "Netdiag"
 
 
 class SysLogTranslator(object):
-    def __init__(self, translators=[TagsTranslator()]):
+    def __init__(self, translators=None):
+        # 这里是 TagsTranslator
+        if translators is None:
+            translators = []
         self.translators = translators
 
     def translate(self, string):
@@ -44,9 +44,9 @@ class SysLogTranslator(object):
         # 03-21 21:31:45.534 12980 15281 I ActivityManager   : START 0 ooooo:
         syslog = re.search(r"(?P<time>\d+.*\.\d{3,}) .* [A-Z] (?P<tag>.*?) {0,}:(?P<msg>.*)", string)
         if syslog:
-            time = syslog.group("time")
             tag = syslog.group("tag")
             msg = syslog.group("msg")
+            time = syslog.group("time")
             for translator in self.translators:
                 show = translator.translate(tag, msg)
                 if show:

@@ -36,7 +36,7 @@ class MyMainWindow(QMainWindow):
         # for simplicity we just generate some random text here
         parse_log = LogReader(callback=self.callback_function)
         # parse_log.multiAnalyze(["E:\\log\\连接日志.txt"])
-        parse_log.multiAnalyze([filename])
+        parse_log.concurrency([filename])
 
     # 定义一个回调函数
     def callback_function(self, result):

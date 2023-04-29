@@ -4,16 +4,15 @@ from log_translator import *
 from data_struct import Log
 
 
-class BluteoothTranslator(TranslateTags):
+class BluetoothTranslator(TagsTranslator):
     def __init__(self):
-        super().__init__()
-        self.tags = {
-            "BluetoothAdapter": bluetoothAdapter,
-            "BluetoothGatt": bluetoothGatt,
+        super().__init__({
+            "BluetoothAdapter": bluetooth_adapter,
+            "BluetoothGatt": bluetooth_gatt,
             "bt_rfcomm": bt_rfcomm,
-            "WS_BT_BluetoothPairingRequest": bluetoothPairingRequest,
-            "ActivityTaskManager": bluetoothPairingDialog
-        }
+            "WS_BT_BluetoothPairingRequest": bluetooth_pairing_request,
+            "ActivityTaskManager": bluetooth_pairing_dialog
+        })
 
 
 code_state = {
@@ -24,17 +23,17 @@ code_state = {
 }
 
 
-def bluetoothPairingDialog(msg):
+def bluetooth_pairing_dialog(msg):
     # ActivityTaskManager: Displayed com.oplus.wirelesssettings/com.android.settings.bluetooth.BluetoothPairingDialog
     # port_rfc_closed: RFCOMM connection closed, index=3, state=2 reason=Closed[19], UUID=111F, bd_addr=ac:73:52:3f:5b:0a, is_server=1
     if "BluetoothPairingDialog" in msg:
-        result = re.search("Displayed.*BluetoothPairingDialog",msg)
+        result = re.search("Displayed.*BluetoothPairingDialog", msg)
         if result:
             return Log(translated=" ----------------------- 配对PIN码弹窗弹出 ----------------------- ")
     return None
 
 
-def bluetoothPairingRequest(msg):
+def bluetooth_pairing_request(msg):
     # port_rfc_closed: RFCOMM connection closed, index=3, state=2 reason=Closed[19], UUID=111F, bd_addr=ac:73:52:3f:5b:0a, is_server=1
     if "PAIRING_REQUEST" in msg:
         return Log(translated=" ----------------------- 设备请求配对 ----------------------- ")
@@ -52,7 +51,7 @@ def bt_rfcomm(msg):
     return None
 
 
-def bluetoothAdapter(msg):
+def bluetooth_adapter(msg):
     if "isLeEnabled" in msg:
         result = re.search(".*: (ON|OFF)", msg)
         if result:
@@ -63,7 +62,7 @@ def bluetoothAdapter(msg):
 
 
 # noinspection PyTypeChecker
-def bluetoothGatt(msg: object) -> object:
+def bluetooth_gatt(msg: object) -> object:
     if "cancelOpen()" in msg:
         result = re.search("device: (.*?)", msg)
         return Log(translated=">>>>>>>>>>  gatt 手机主动断开连接 %s  <<<<<<<< " % (result.group(1)), error=True)
@@ -74,7 +73,6 @@ def bluetoothGatt(msg: object) -> object:
         result = re.search("device: (.*?),", msg)
         return Log(translated=">>>>>>>>>>  gatt 发起设备连接 %s  <<<<<<<< " % (result.group(1)), error=True)
     return None
-
 
 
 if __name__ == '__main__':
