@@ -24,11 +24,13 @@ def traverse_files(folder_path):
                 first = re.search(r"^(\d+).?(?=-)", new_name)
                 second = re.search(r"(?<=-).?(\d+)", new_name)
                 if first:
-                    if len(first.group(1)) == 1:
-                        new_name = new_name.replace(first.group(), "0%s" % first.group(1), 1)
+                    num = first.group().strip()
+                    if len(num) == 1:
+                        new_name = new_name.replace(first.group(), "0%s" % num, 1)
                 if second:
-                    if len(second.group(1)) == 1:
-                        new_name = new_name.replace("-%s" % second.group(), "-0%s" % second.group(1), 1)
+                    num = second.group().strip()
+                    if len(num) == 1:
+                        new_name = new_name.replace("-%s" % second.group(), "-0%s" % num, 1)
 
                 new_file = os.path.join(folder_path, new_name)
                 if not os.path.exists(new_file):
@@ -48,16 +50,16 @@ def print_hi(name):
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
     traverse_files('.')
-    # str = "4 -09 测试课程"
+    # str = "4 -19 测试课程"
     #
     # first = re.search(r"^(\d+).?(?=-)", str)
     # second = re.search(r"(?<=-).?(\d+)", str)
     # if first:
-    #     if len(first.group(1)) == 1:
-    #         str = str.replace(first.group(), "0%s" % first.group(1), 1)
+    #     if len(first.group().strip()) == 1:
+    #         str = str.replace(first.group(), "0%s" % first.group().strip(), 1)
     # if second:
-    #     if len(second.group(1)) == 1:
-    #         str = str.replace("-%s" % second.group(), "-0%s" % second.group(1), 1)
+    #     if len(second.group().strip()) == 1:
+    #         str = str.replace("-%s" % second.group(), "-0%s" % second.group().strip(), 1)
     # print(str)
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
 
