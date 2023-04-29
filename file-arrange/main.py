@@ -12,13 +12,24 @@ def traverse_files(folder_path):
     for root, dirs, files in os.walk(folder_path):
         for file in files:
             old_file = os.path.join(root, file)
-            result = re.search("^\d+", file)
+            result = re.search(r"^\d+", file)
             if result:
                 num = result.group()
                 if len(num) == 1:
                     new_name = file.replace(num, "0%s" % num, 1)
                 else:
                     new_name = file
+
+                # 把 1-1 转为01-01
+                first = re.search(r"^(\d+).?(?=-)", new_name)
+                second = re.search(r"(?<=-).?(\d+)", new_name)
+                if first:
+                    if len(first.group(1)) == 1:
+                        new_name = new_name.replace(first.group(), "0%s" % first.group(1), 1)
+                if second:
+                    if len(second.group(1)) == 1:
+                        new_name = new_name.replace("-%s" % second.group(), "-0%s" % second.group(1), 1)
+
                 new_file = os.path.join(folder_path, new_name)
                 if not os.path.exists(new_file):
                     if new_file != old_file:
@@ -37,5 +48,19 @@ def print_hi(name):
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
     traverse_files('.')
-
+    # str = "4 -09 测试课程"
+    #
+    # first = re.search(r"^(\d+).?(?=-)", str)
+    # second = re.search(r"(?<=-).?(\d+)", str)
+    # if first:
+    #     if len(first.group(1)) == 1:
+    #         str = str.replace(first.group(), "0%s" % first.group(1), 1)
+    # if second:
+    #     if len(second.group(1)) == 1:
+    #         str = str.replace("-%s" % second.group(), "-0%s" % second.group(1), 1)
+    # print(str)
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
+
+
+# pip install PyInstaller
+# pyinstaller -n file-arrange -F main.py

@@ -76,7 +76,7 @@ if __name__ == '__main__':
 #  打包执行以下命令
 # pyinstaller -n log_translator -F -w -i tools.ico ui.py
 
-
+# pip install PyInstaller
 # pyinstaller --name=<your_exe_name> --onefile --windowed --add-data "<your_data_folder>;<your_data_folder>" <your_script_name>.py
 
 # 上述命令中的选项说明：
