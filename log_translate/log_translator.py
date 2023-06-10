@@ -3,41 +3,37 @@ import re
 from data_struct import Log
 
 
-# 用于解析多个tag  例子参考 BluetoothTranslator
-class TagsTranslator(object):
-    def __init__(self, tag_translators):
-        self.tag_translators = tag_translators
+# 通过正则表达式匹配tag解析
+class TagPatternTranslator(object):
+    def __init__(self, pattern_translators):
+        self.pattern_translators = pattern_translators
 
     def translate(self, tag, msg):
-        if tag in self.tag_translators:
-            translator = self.tag_translators[tag]
+        for pattern in self.pattern_translators:
+            match = re.compile(pattern, tag)
+            if match:
+                return self.pattern_translators[pattern](msg)
+        return None
+
+
+# 字符串匹配tag  例子参考 BluetoothTranslator
+class TagStrTranslator(object):
+    def __init__(self, str_translators):
+        self.str_translators = str_translators
+
+    def translate(self, tag, msg):
+        if tag in self.str_translators:
+            translator = self.str_translators[tag]
             return translator(msg)
         return None
 
 
-# 只解析一个tag
-class TagTranslator(TagsTranslator):
-    def __init__(self):
-        super().__init__({self.tag(): self})
-
-    def tag(self):
-        pass
-
-    def translate(self, tag, msg):
-        return Log(translated=msg)
-
-
-class DemoTagTranslator(TagTranslator):
-    def tag(self):
-        return "Netdiag"
-
-
 class SysLogTranslator(object):
-    def __init__(self, translators=None):
-        # 这里是 TagsTranslator
-        if translators is None:
-            translators = []
-        self.translators = translators
+    def __init__(self, tag_translators=None):
+        # 这里是 TagStrTranslator
+        if tag_translators is None:
+            tag_translators = []
+        self.tag_translators = tag_translators
 
     def translate(self, string):
         # 系统日志
@@ -47,7 +43,7 @@ class SysLogTranslator(object):
             tag = syslog.group("tag")
             msg = syslog.group("msg")
             time = syslog.group("time")
-            for translator in self.translators:
+            for translator in self.tag_translators:
                 show = translator.translate(tag, msg)
                 if show:
                     show.time = time

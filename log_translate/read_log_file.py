@@ -35,22 +35,28 @@ class LogReader(object):
         # 分行读取数据
         for datas in self.readFile(path):
             # 对日志进行翻译
-            str = datas.decode('ISO-8859-1')
-            for translator in self.log_translators:
-                result = translator.translate(str)
-                # 翻译后的日志存起来
-                if result:
-                    print(result)
-                    if self.callback:
-                        self.callback(result)
+            try:
+                str = datas.decode('ISO-8859-1')
+                for translator in self.log_translators:
+                    try:
+                        result = translator.translate(str)
+                        # 翻译后的日志存起来
+                        if result:
+                            print(result)
+                            if self.callback:
+                                self.callback(result)
+                            break
+                    except:
+                        print(str)
+            except:
+                print("decode error")
 
     def concurrency(self, log_files):
         # 多线程 解析
         for file in log_files:
             abspath = os.path.abspath(file)
             print(abspath)
-            threading_thread = threading.Thread(target=self.analyze, name="read_log_file",
-                                                args=(abspath,))
+            threading_thread = threading.Thread(target=self.analyze, name="read_log_file", args=(abspath,))
             threading_thread.start()
 
 

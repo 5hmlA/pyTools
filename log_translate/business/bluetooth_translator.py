@@ -4,7 +4,7 @@ from log_translator import *
 from data_struct import Log
 
 
-class BluetoothTranslator(TagsTranslator):
+class BluetoothTranslator(TagStrTranslator):
     def __init__(self):
         super().__init__({
             "BluetoothAdapter": bluetooth_adapter,
