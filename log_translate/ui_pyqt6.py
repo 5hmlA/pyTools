@@ -1,36 +1,16 @@
 import sys
 from random import randint
 
-from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QBrush, QColor
-from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QMenu, QListWidgetItem, QAbstractItemView
-
-
-class MyListWidget(QListWidget):
-    def __init__(self):
-        super().__init__()
-        self.setAcceptDrops(True)
-        # self.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-
-    def dropEvent(self, event):
-        for url in event.mimeData().urls():
-            path = url.toLocalFile()
-            item = QListWidgetItem(path)
-            item.setForeground(QBrush(QColor(randint(0, 255), randint(0, 255), randint(0, 255))))
-            self.addItem(item)
+from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
 
 
 class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("My Window")
-        self.list_widget = MyListWidget()
+        self.list_widget = QListWidget()
+        self.list_widget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.setCentralWidget(self.list_widget)
         self.setAcceptDrops(True)
         self.create_menu()
@@ -48,15 +28,24 @@ class MyWindow(QMainWindow):
         separator_action.triggered.connect(self.add_separator)
         edit_menu.addAction(separator_action)
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            item = QListWidgetItem(path)
+            item.setForeground(QBrush(QColor(randint(0, 255), randint(0, 255), randint(0, 255))))
+            self.list_widget.addItem(item)
+
     def clear_list(self):
         self.list_widget.clear()
 
     def add_separator(self):
-        item = QListWidgetItem()
-        item.setFlags(Qt.ItemIsEnabled)
-        item.setTextAlignment(Qt.AlignCenter)
-        item.setText("--------------------")
-        self.list_widget.addItem(item)
+        self.list_widget.addItem("--" * 40)
 
 
 if __name__ == "__main__":

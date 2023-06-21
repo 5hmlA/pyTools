@@ -1,8 +1,8 @@
-from PySide2.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QAction, QFileDialog, QListWidget, \
-    QListWidgetItem, QAbstractItemView
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QColor
 import random
+
+from PySide2.QtGui import QColor
+from PySide2.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QAction, QListWidget, \
+    QListWidgetItem, QAbstractItemView
 
 
 class MainWindow(QMainWindow):
