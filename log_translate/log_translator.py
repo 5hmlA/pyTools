@@ -10,9 +10,9 @@ class TagPatternTranslator(object):
 
     def translate(self, tag, msg):
         for pattern in self.pattern_translators:
-            match = re.compile(pattern, tag)
+            match = re.compile(pattern).match(tag)
             if match:
-                return self.pattern_translators[pattern](msg)
+                return self.pattern_translators[pattern](tag, msg)
         return None
 
 

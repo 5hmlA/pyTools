@@ -1,7 +1,7 @@
 import re
 
 from log_translator import *
-from data_struct import Log
+from data_struct import Log, Level
 
 
 class BluetoothTranslator(TagStrTranslator):
@@ -46,7 +46,7 @@ def bt_rfcomm(msg):
         result = re.search(".*: (ON|OFF)", msg)
         if result:
             if result.group(1) in code_state:
-                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), error=True)
+                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), level=Level.w)
 
     return None
 
@@ -56,7 +56,7 @@ def bluetooth_adapter(msg):
         result = re.search(".*: (ON|OFF)", msg)
         if result:
             if result.group(1) in code_state:
-                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), error=True)
+                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), level=Level.w)
 
     return None
 
@@ -65,13 +65,13 @@ def bluetooth_adapter(msg):
 def bluetooth_gatt(msg: object) -> object:
     if "cancelOpen()" in msg:
         result = re.search("device: (.*?)", msg)
-        return Log(translated=">>>>>>>>>>  gatt 手机主动断开连接 %s  <<<<<<<< " % (result.group(1)), error=True)
+        return Log(translated=">>>>>>>>>>  gatt 手机主动断开连接 %s  <<<<<<<< " % (result.group(1)), level=Level.w)
     if "close()" in msg:
-        return Log(translated=">>>>>>>>>>  gatt 手机主动关闭连接  <<<<<<<< ", error=True)
+        return Log(translated=">>>>>>>>>>  gatt 手机主动关闭连接  <<<<<<<< ", level=Level.w)
     if "connect()" in msg:
         # connect() - device: 34:47:9A:31:52:CF, auto: false, eattSupport: false
         result = re.search("device: (.*?),", msg)
-        return Log(translated=">>>>>>>>>>  gatt 发起设备连接 %s  <<<<<<<< " % (result.group(1)), error=True)
+        return Log(translated=">>>>>>>>>>  gatt 发起设备连接 %s  <<<<<<<< " % (result.group(1)), level=Level.w)
     return None
 
 

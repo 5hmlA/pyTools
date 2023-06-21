@@ -1,6 +1,7 @@
 # This is a sample Python script.
 import os
 import threading
+import traceback
 from collections import deque
 from os import cpu_count
 
@@ -46,10 +47,13 @@ class LogReader(object):
                             if self.callback:
                                 self.callback(result)
                             break
-                    except:
+                    except Exception as e:
+                        print('日志翻译发生异常：', e)
                         print(str)
-            except:
-                print("decode error")
+                        traceback.print_exc()
+            except Exception as e:
+                print('文件解析发生异常：', e)
+                traceback.print_exc()
 
     def concurrency(self, log_files):
         # 多线程 解析
