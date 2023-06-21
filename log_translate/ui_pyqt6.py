@@ -5,10 +5,10 @@ from PyQt6.QtGui import QAction, QBrush, QColor
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
 
 
-class MyWindow(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("My Window")
+        self.setWindowTitle("拖放文件示例")
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.setCentralWidget(self.list_widget)
@@ -17,16 +17,15 @@ class MyWindow(QMainWindow):
 
     def create_menu(self):
         menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu("File")
-        edit_menu = menu_bar.addMenu("Edit")
+        action = menu_bar.addMenu("操作")
 
-        clear_action = QAction("Clear", self)
+        clear_action = QAction("清空", self)
         clear_action.triggered.connect(self.clear_list)
-        file_menu.addAction(clear_action)
+        action.addAction(clear_action)
 
-        separator_action = QAction("Add Separator", self)
+        separator_action = QAction("分割线", self)
         separator_action.triggered.connect(self.add_separator)
-        edit_menu.addAction(separator_action)
+        action.addAction(separator_action)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -37,6 +36,7 @@ class MyWindow(QMainWindow):
     def dropEvent(self, event):
         for url in event.mimeData().urls():
             path = url.toLocalFile()
+            # for i in range(100):
             item = QListWidgetItem(path)
             item.setForeground(QBrush(QColor(randint(0, 255), randint(0, 255), randint(0, 255))))
             self.list_widget.addItem(item)
@@ -50,6 +50,6 @@ class MyWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MyWindow()
+    window = MainWindow()
     window.show()
     sys.exit(app.exec())
