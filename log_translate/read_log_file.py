@@ -5,8 +5,9 @@ import traceback
 from collections import deque
 from os import cpu_count
 
+from rx.subject import Subject
+
 from config import translates
-from log_translator import *
 
 
 # //必须定义在使用者前面
@@ -14,8 +15,8 @@ class LogReader(object):
     def __init__(self,
                  chunk_size=1024 * 1024 * 10,
                  process_num_for_log_parsing=cpu_count(),
-                 callback=None,
                  translagors=translates):
+
         self.log_unparsed_queue = deque()  # 用于存储未解析日志
         self.log_line_parsed_queue = deque()  # 用于存储已解析日志行
         self.is_all_files_read = False  # 标识是否已读取所有日志文件
@@ -24,9 +25,10 @@ class LogReader(object):
         self.files_read_list = []  # 存放已读取日志文件
         self.log_parsing_finished = False  # 标识是否完成日志解析
         self.log_translators = translagors  # 翻译
-        self.callback = callback
+        self.log_stream = Subject()
 
-    def readFile(self, path="."):
+    @staticmethod
+    def readFile(path="."):
         with open(path, "rb") as f:
             for fline in f:
                 yield fline
@@ -44,16 +46,17 @@ class LogReader(object):
                         # 翻译后的日志存起来
                         if result:
                             print(result)
-                            if self.callback:
-                                self.callback(result)
+                            self.log_stream.on_next(result)
                             break
                     except Exception as e:
                         print('日志翻译发生异常：', e)
                         print(str)
                         traceback.print_exc()
+                        raise e
             except Exception as e:
                 print('文件解析发生异常：', e)
                 traceback.print_exc()
+                raise e
 
     def concurrency(self, log_files):
         # 多线程 解析

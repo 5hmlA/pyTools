@@ -1,8 +1,11 @@
 import sys
-from random import randint
+import traceback
 
 from PyQt6.QtGui import QAction, QBrush, QColor
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
+
+from data_struct import Log
+from read_log_file import LogReader
 
 
 class MainWindow(QMainWindow):
@@ -14,6 +17,10 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.list_widget)
         self.setAcceptDrops(True)
         self.create_menu()
+        self.log_reader = LogReader()
+        self.log_reader.log_stream.subscribe_(lambda log: {
+            self.list_widget.addItem(self.addItemFromLog(log))
+        })
 
     def create_menu(self):
         menu_bar = self.menuBar()
@@ -29,17 +36,29 @@ class MainWindow(QMainWindow):
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
+            if not self.isMaximized():
+                self.showMaximized()
             event.accept()
         else:
             event.ignore()
 
     def dropEvent(self, event):
         for url in event.mimeData().urls():
-            path = url.toLocalFile()
+            file = url.toLocalFile()
+            # f-string 可以使用 {变量} 语法将表达式嵌入到字符串中
+            self.list_widget.addItem(f"\n--------------{file} 日志解析如下 --------------")
+            try:
+                self.log_reader.concurrency([file])
+            except Exception as e:
+                item = QListWidgetItem(traceback.format_exc())
+                item.setForeground(QBrush(QColor("red")))
+                self.list_widget.addItem(item)
             # for i in range(100):
-            item = QListWidgetItem(path)
-            item.setForeground(QBrush(QColor(randint(0, 255), randint(0, 255), randint(0, 255))))
-            self.list_widget.addItem(item)
+
+    def addItemFromLog(self, log: Log):
+        item = QListWidgetItem(log.__str__())
+        item.setForeground(QBrush(QColor(log.level.color())))
+        self.list_widget.addItem(item)
 
     def clear_list(self):
         self.list_widget.clear()

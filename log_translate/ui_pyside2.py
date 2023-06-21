@@ -1,8 +1,11 @@
-import random
+import traceback
 
-from PySide2.QtGui import QColor
-from PySide2.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QAction, QListWidget, \
+from PySide6.QtGui import QColor, QAction
+from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QListWidget, \
     QListWidgetItem, QAbstractItemView
+
+from data_struct import Log
+from read_log_file import LogReader
 
 
 class MainWindow(QMainWindow):
@@ -15,17 +18,22 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
         self.setCentralWidget(self.list_widget)
         self.create_menu_bar()
+        self.log_reader = LogReader()
+        self.log_reader.log_stream.subscribe_(lambda log: {
+            self.addItemFromLog(log)
+        })
 
     def create_menu_bar(self):
-        menu_bar = QMenuBar()
-        file_menu = QMenu("文件", menu_bar)
-        clear_action = QAction("清空列表", file_menu)
+        menu_bar = QMenuBar(self)
+        action_menu = QMenu("操作")
+        clear_action = QAction("清空列表")
         clear_action.triggered.connect(self.clear_list)
-        line_action = QAction("增加分割线", file_menu)
+        line_action = QAction("增加分割线")
         line_action.triggered.connect(self.add_line)
-        file_menu.addAction(clear_action)
-        file_menu.addAction(line_action)
-        menu_bar.addMenu(file_menu)
+
+        action_menu.addAction(clear_action)
+        action_menu.addAction(line_action)
+        menu_bar.addMenu(action_menu)
         self.setMenuBar(menu_bar)
 
     def clear_list(self):
@@ -36,24 +44,33 @@ class MainWindow(QMainWindow):
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
+            if not self.isMaximized():
+                self.showMaximized()
             event.accept()
         else:
             event.ignore()
 
     def dropEvent(self, event):
         for url in event.mimeData().urls():
-            item = self.createItemFromUrl(url)
-            self.list_widget.addItem(item)
+            file = url.toLocalFile()
+            # f-string 可以使用 {变量} 语法将表达式嵌入到字符串中
+            self.list_widget.addItem(f"\n--------------{file} 日志解析如下 --------------\n")
+            try:
+                self.log_reader.concurrency([file])
+            except Exception as e:
+                item = QListWidgetItem(traceback.format_exc())
+                item.setForeground(QColor("red"))
+                self.list_widget.addItem(item)
 
-    def createItemFromUrl(self, url):
-        item = QListWidgetItem(url.toLocalFile())
-        color = QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    def addItemFromLog(self, log: Log):
+        item = QListWidgetItem(log.__str__())
+        color = QColor(log.level.color())
         item.setForeground(color)
-        return item
+        self.list_widget.addItem(item)
 
 
 if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
     window.show()
-    app.exec_()
+    app.exec()
