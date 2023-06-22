@@ -32,7 +32,7 @@ class Log(object):
         self.type = type
 
     def __str__(self):
-        return self.time + " | " + self.process + " | " + self.translated
+        return self.time + " ⭕ " + self.process + " ⭕ " + self.translated
         # return self.time + ">" + self.process + ">" + self.origin_msg + ">" + self.translated_msg
 
 

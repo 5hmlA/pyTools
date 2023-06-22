@@ -1,7 +1,5 @@
 import re
 
-from data_struct import Log
-
 
 # 通过正则表达式匹配tag解析
 class TagPatternTranslator(object):
@@ -10,7 +8,7 @@ class TagPatternTranslator(object):
 
     def translate(self, tag, msg):
         for pattern in self.pattern_translators:
-            match = re.compile(pattern).match(tag)
+            match = re.compile(pattern, re.IGNORECASE).match(tag)
             if match:
                 return self.pattern_translators[pattern](tag, msg)
         return None
