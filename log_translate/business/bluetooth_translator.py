@@ -1,7 +1,19 @@
-import re
-
-from log_translator import *
 from data_struct import Log, Level
+from log_translator import *
+
+
+class SecTagDemoTranslator(SecStrTagTranslator):
+    def __init__(self):
+        super().__init__("DFJ",
+                         lambda string: re.search(r"(?P<tag>.*?) *:(?P<msg>.*)", string),
+                         [
+                             SysLogTranslator({
+                                 "sec_tag": self.new_tag
+                             })
+                         ])
+
+    def new_tag(self, tag, msg):
+        return Log(translated=msg)
 
 
 class BluetoothTranslator(TagStrTranslator):
