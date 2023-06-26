@@ -3,8 +3,8 @@ import traceback
 from PySide6.QtGui import QColor, QAction
 from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QListWidget, QListWidgetItem, QAbstractItemView
 
-from data_struct import Log, Level
-from read_log_file import LogReader
+from log_translate.data_struct import Log, Level
+from log_translate.read_log_file import LogReader
 
 
 def log_to_list_item(log: Log):

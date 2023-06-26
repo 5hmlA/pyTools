@@ -1,7 +1,7 @@
 import re
 from abc import abstractmethod
 
-from gloable import pids
+from log_translate.gloable import pids
 
 
 # 通过正则表达式匹配tag解析

@@ -1,5 +1,5 @@
-from data_struct import Log, Level
-from log_translator import *
+from log_translate.data_struct import Log, Level
+from log_translate.log_translator import *
 
 
 class SecTagDemoTranslator(SecStrTagTranslator):

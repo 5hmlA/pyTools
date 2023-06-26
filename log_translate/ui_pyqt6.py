@@ -4,8 +4,8 @@ import traceback
 from PyQt6.QtGui import QAction, QBrush, QColor
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
 
-from data_struct import Log, Level
-from read_log_file import LogReader
+from log_translate.data_struct import Log, Level
+from log_translate.read_log_file import LogReader
 
 
 def log_to_list_item(log: Log):

@@ -1,11 +1,12 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='LogTranslate',
-    version='0.1',
+    version='0.3',
     author='5hmlA',
     author_email='jonas.jzy@gmail.com',
-    packages=find_packages(),
+    # packages=find_packages(),
+    packages=['log_translate', 'log_translate/business'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

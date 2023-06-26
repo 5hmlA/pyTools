@@ -8,7 +8,7 @@ from os import cpu_count
 
 from rx.subject import Subject
 
-from config_demo import translators
+from log_translate.config_demo import translators
 
 
 # //必须定义在使用者前面
