@@ -58,7 +58,7 @@ def bt_rfcomm(msg):
         result = re.search(".*: (ON|OFF)", msg)
         if result:
             if result.group(1) in code_state:
-                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), level=Level.w)
+                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), level=Level.i)
 
     return None
 
@@ -68,7 +68,7 @@ def bluetooth_adapter(msg):
         result = re.search(".*: (ON|OFF)", msg)
         if result:
             if result.group(1) in code_state:
-                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), level=Level.w)
+                return Log(translated=">>>>>>>>>>  %s  <<<<<<<< " % (code_state[result.group(1)]), level=Level.i)
 
     return None
 

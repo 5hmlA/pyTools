@@ -1,6 +1,6 @@
 from enum import Enum
 
-from typer.colors import RED, BLACK, GREEN, BRIGHT_RED
+from typer.colors import RED, BLACK, GREEN, MAGENTA
 
 
 class Level(Enum):
@@ -11,15 +11,23 @@ class Level(Enum):
 
     def color(self):
         # return self.value
-        match self.value:
-            case 0:
-                return BLACK
-            case 1:
-                return GREEN
-            case 2:
-                return BRIGHT_RED
-            case 2:
-                return RED
+        # match self.value:
+        #     case 0:
+        #         return BLACK
+        #     case 1:
+        #         return GREEN
+        #     case 2:
+        #         return MAGENTA
+        #     case 3:
+        #         return RED
+        if self.value == 0:
+            return BLACK
+        if self.value == 1:
+            return GREEN
+        if self.value == 2:
+            return MAGENTA
+        if self.value == 3:
+            return RED
 
 
 class Log(object):

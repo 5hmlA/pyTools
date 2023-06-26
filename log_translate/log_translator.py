@@ -1,6 +1,8 @@
 import re
 from abc import abstractmethod
 
+from gloable import pids
+
 
 # 通过正则表达式匹配tag解析
 # :param pattern_translators 是数据[tag,fun(tag, msg)] fun参数必须是(tag, msg)
@@ -77,13 +79,18 @@ class StringTranslator(object):
             tag = log.group("tag")
             msg = log.group("msg")
             time = log.group("time")
-            pid = log.group("pid")
+            try:
+                pid = log.group("pid")
+            except:
+                pid = "0000"
             for translator in self.tag_translators:
                 show = translator.translate(tag, msg)
                 if show:
                     show.time = time
                     show.oring = msg
                     show.process = pid
+                    if pids.count(pid) == 0:
+                        pids.append(pid)
                     return show
         return None
 

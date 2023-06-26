@@ -1,11 +1,16 @@
 import traceback
 
 from PySide6.QtGui import QColor, QAction
-from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QListWidget, \
-    QListWidgetItem, QAbstractItemView
+from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QListWidget, QListWidgetItem, QAbstractItemView
 
-from data_struct import Log
+from data_struct import Log, Level
 from read_log_file import LogReader
+
+
+def log_to_list_item(log: Log):
+    item = QListWidgetItem(log.__str__())
+    item.setForeground(QColor(log.level.color()))
+    return item
 
 
 class MainWindow(QMainWindow):
@@ -19,23 +24,40 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.list_widget)
         self.create_menu_bar()
         self.log_reader = LogReader()
+        self.data_item_logs = {
+            Level.d.value: [],
+            Level.i.value: [],
+            Level.w.value: [],
+            Level.e.value: [],
+        }
         self.log_reader.log_stream.subscribe_(lambda log: {
-            self.addItemFromLog(log)
+            self.collect_logs_and_show(log),
         })
         self.list_widget.addItem("💫 💭 把文件拖入到窗口开始解析日志 💭 💫")
 
     def create_menu_bar(self):
         menu_bar = self.menuBar()
         action_menu = QMenu("操作", self)
-        clear_action = QAction("清空列表", self)
-        clear_action.setShortcut('Ctrl+O')
-        clear_action.triggered.connect(self.clear_list)
-        line_action = QAction("增加分割线", self)
-        line_action.setShortcut('Ctrl+L')
-        line_action.triggered.connect(self.add_line)
 
+        clear_action = QAction("Level_D", self)
+        clear_action.setShortcut('Ctrl+D')
+        clear_action.triggered.connect(self.filtter_logs_d)
         action_menu.addAction(clear_action)
-        action_menu.addAction(line_action)
+
+        clear_action = QAction("Level_I", self)
+        clear_action.setShortcut('Ctrl+I')
+        clear_action.triggered.connect(self.filtter_logs_i)
+        action_menu.addAction(clear_action)
+
+        clear_action = QAction("Level_W", self)
+        clear_action.setShortcut('Ctrl+W')
+        clear_action.triggered.connect(self.filtter_logs_w)
+        action_menu.addAction(clear_action)
+
+        clear_action = QAction("Level_E", self)
+        clear_action.setShortcut('Ctrl+E')
+        clear_action.triggered.connect(self.filtter_logs_e)
+        action_menu.addAction(clear_action)
         menu_bar.addMenu(action_menu)
 
     def clear_list(self):
@@ -60,16 +82,37 @@ class MainWindow(QMainWindow):
             self.list_widget.addItem(f"\n👇👇👇👇👇👇👇👇 {file} 💥 日志解析如下 👇👇👇👇👇👇👇👇")
             try:
                 self.log_reader.concurrency([file])
-            except Exception as e:
+            except:
                 item = QListWidgetItem(traceback.format_exc())
                 item.setForeground(QColor("red"))
                 self.list_widget.addItem(item)
 
-    def addItemFromLog(self, log: Log):
-        item = QListWidgetItem(log.__str__())
-        color = QColor(log.level.color())
-        item.setForeground(color)
-        self.list_widget.addItem(item)
+    def collect_logs_and_show(self, log: Log):
+        for log_level in self.data_item_logs:
+            if log.level.value >= log_level:
+                self.data_item_logs[log_level].append(log)
+        if log.level.value > Level.w.value:
+            self.list_widget.addItem(log_to_list_item(log))
+
+    def filtter_logs_d(self):
+        self.filtter_logs(Level.d)
+
+    def filtter_logs_i(self):
+        self.filtter_logs(Level.i)
+
+    def filtter_logs_w(self):
+        self.filtter_logs(Level.w)
+
+    def filtter_logs_e(self):
+        self.filtter_logs(Level.e)
+
+    def filtter_logs(self, level: Level):
+        first = self.list_widget.item(0).text()
+        self.list_widget.clear()
+        self.list_widget.addItem(first)
+        show_logs = self.data_item_logs[level.value]
+        for log in show_logs:
+            self.list_widget.addItem(log_to_list_item(log))
 
 
 if __name__ == "__main__":
@@ -86,7 +129,8 @@ if __name__ == "__main__":
 # -i <FILE.ico>, --icon <FILE.ico>  指定icon
 
 #  打包执行以下命令
-# pyinstaller -n log_translator -F -w -i tools.ico ui_pyside2.py
+# pyinstaller --hidden-import -n log_translator -F -w -i tools.ico ui_pyside2.py
+# --hidden-import 设置导入要动态加载的类 因为没被引用 所以不会导入需要手动设置
 
 # pip install PyInstaller
 # pyinstaller --name=<your_exe_name> --onefile --windowed --add-data "<your_data_folder>;<your_data_folder>" <your_script_name>.py

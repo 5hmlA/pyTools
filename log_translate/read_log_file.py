@@ -1,4 +1,5 @@
 # This is a sample Python script.
+import importlib
 import os
 import threading
 import traceback
@@ -7,16 +8,14 @@ from os import cpu_count
 
 from rx.subject import Subject
 
-from config import translates
+from config_demo import translators
 
 
 # //必须定义在使用者前面
 class LogReader(object):
     def __init__(self,
                  chunk_size=1024 * 1024 * 10,
-                 process_num_for_log_parsing=cpu_count(),
-                 translagors=translates):
-
+                 process_num_for_log_parsing=cpu_count()):
         self.log_unparsed_queue = deque()  # 用于存储未解析日志
         self.log_line_parsed_queue = deque()  # 用于存储已解析日志行
         self.is_all_files_read = False  # 标识是否已读取所有日志文件
@@ -24,8 +23,14 @@ class LogReader(object):
         self.chunk_size = chunk_size  # 每次读取日志的日志块大小
         self.files_read_list = []  # 存放已读取日志文件
         self.log_parsing_finished = False  # 标识是否完成日志解析
-        self.log_translators = translagors  # 翻译
         self.log_stream = Subject()
+        # 翻译
+        try:
+            config = importlib.import_module("config")
+            self.log_translators = getattr(config, "translators")
+        except:
+            traceback.print_exc()
+            self.log_translators = translators
 
     @staticmethod
     def readFile(path="."):
