@@ -2,6 +2,8 @@ from enum import Enum
 
 from typer.colors import RED, BLACK, GREEN, MAGENTA
 
+dot = "▫️"
+
 
 class Level(Enum):
     d = 0
@@ -40,10 +42,14 @@ class Log(object):
         self.type = type
 
     def __str__(self):
-        return self.time + " ⭕ " + self.process + " ⭕ " + self.translated
-        # return self.time + ">" + self.process + ">" + self.origin_msg + ">" + self.translated_msg
+        return f"{self.time} {dot} {self.process} {dot} {self.translated}"
+
+    def str_with_origin(self):
+        show = f"{self.time} {dot} {self.process} {dot} {self.translated}\n{self.origin}"
+        return show
 
 
 if __name__ == '__main__':
     print(Level.d.value)
-    print(Level.d.name)
+    print(Level(Level.d))
+    print(Level(3))

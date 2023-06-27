@@ -4,6 +4,12 @@
 
 ## 使用
 
+安装
+
+```commandline
+pip install LogTranslate
+```
+
 项目根目录 创建 config.py
 里面定义字段 translator数组
 
@@ -60,11 +66,22 @@ SysLogTranslator的参数 tag_translators 是数组 用来解析 各种tag对应
 
 ## 打包成 exe
 
+#### 1 ，项目根目录创建 ui.py
+
+```python
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = PyQt6Window()
+    window.show()
+    sys.exit(app.exec())
+```
+
+#### 2， 执行打包命令
+
 ```commandline
 
-pyinstaller -n log_translator --hidden-import config -F -w -i tools.ico ui_pyqt6.py
-
-pyinstaller --hidden-import -n log_translator -F -w -i tools.ico ui_pyside2.py
+pyinstaller -n [name] --hidden-import config -F -w [-i tools.ico] ui.py
 
 ```
 
@@ -72,6 +89,3 @@ pyinstaller --hidden-import -n log_translator -F -w -i tools.ico ui_pyside2.py
 
 https://pypi.org/project/LogTranslate/0.1/
 
-```commandline
-pip install LogTranslate==0.3
-```

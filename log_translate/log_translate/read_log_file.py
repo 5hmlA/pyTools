@@ -8,7 +8,8 @@ from os import cpu_count
 
 from rx.subject import Subject
 
-from log_translate.config_demo import translators
+from log_translate.config_default import translators
+from log_translate.data_struct import Log
 
 
 # //必须定义在使用者前面
@@ -44,13 +45,14 @@ class LogReader(object):
         for datas in self.readFile(path):
             # 对日志进行翻译
             try:
-                str = datas.decode('ISO-8859-1')
+                str = datas.decode('ISO-8859-1').strip()
                 for translator in self.log_translators:
                     try:
                         result = translator.translate(str)
                         # 翻译后的日志存起来
                         if result:
                             print(result)
+                            result.origin = str
                             self.log_stream.on_next(result)
                             break
                     except Exception as e:
@@ -62,6 +64,7 @@ class LogReader(object):
                 print('文件解析发生异常：', e)
                 traceback.print_exc()
                 raise e
+        self.log_stream.on_next(Log(translated=None))
 
     def concurrency(self, log_files):
         # 多线程 解析

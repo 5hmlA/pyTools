@@ -1,5 +1,7 @@
+import re
+
 from log_translate.data_struct import Log, Level
-from log_translate.log_translator import *
+from log_translate.log_translator import TagPatternTranslator
 
 
 class CrashPatternTranslator(TagPatternTranslator):
@@ -10,8 +12,8 @@ class CrashPatternTranslator(TagPatternTranslator):
 
 
 def activity_task_translator(tag, msg):
-    # todo 这里需要过滤包名
-    return Log(translated=" ------ %s > %s----- " % (tag, msg), level=Level.e)
+    # if len(pids) > 0:
+    return Log(translated=" %s > %s " % (tag, msg), level=Level.e)
 
 
 if __name__ == '__main__':

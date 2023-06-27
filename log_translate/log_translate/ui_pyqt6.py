@@ -1,28 +1,26 @@
+import sys
 import traceback
 
-from PySide6.QtGui import QColor, QAction
-from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QListWidget, QListWidgetItem, QAbstractItemView
+import keyboard as keyboard
+import pkg_resources
+from PyQt6.QtGui import QAction, QBrush, QColor, QIcon
+from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
 
 from log_translate.data_struct import Log, Level
 from log_translate.read_log_file import LogReader
 
 
-def log_to_list_item(log: Log):
-    item = QListWidgetItem(log.__str__())
-    item.setForeground(QColor(log.level.color()))
-    return item
-
-
-class MainWindow(QMainWindow):
+class PyQt6Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("🤖日志解析")
-        self.resize(400, 300)
+        ico = pkg_resources.resource_filename('log_translate', 'res/log_logo.ico')
+        self.setWindowIcon(QIcon(ico))
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.setAcceptDrops(True)
         self.setCentralWidget(self.list_widget)
-        self.create_menu_bar()
+        self.setAcceptDrops(True)
+        self.create_menu()
         self.log_reader = LogReader()
         self.data_item_logs = {
             Level.d.value: [],
@@ -30,41 +28,38 @@ class MainWindow(QMainWindow):
             Level.w.value: [],
             Level.e.value: [],
         }
+        self.show_level = Level.e.value
+        self.show_origin = False
         self.log_reader.log_stream.subscribe_(lambda log: {
             self.collect_logs_and_show(log),
         })
         self.list_widget.addItem("💫 💭 把文件拖入到窗口开始解析日志 💭 💫")
 
-    def create_menu_bar(self):
+    def create_menu(self):
         menu_bar = self.menuBar()
-        action_menu = QMenu("操作", self)
+        action = menu_bar.addMenu("操作")
 
-        clear_action = QAction("Level_D", self)
-        clear_action.setShortcut('Ctrl+D')
-        clear_action.triggered.connect(self.filtter_logs_d)
-        action_menu.addAction(clear_action)
+        filter_action = QAction("Level_D", self)
+        filter_action.setShortcut('Ctrl+D')
+        filter_action.triggered.connect(self.filter_logs_d)
+        action.addAction(filter_action)
 
-        clear_action = QAction("Level_I", self)
-        clear_action.setShortcut('Ctrl+I')
-        clear_action.triggered.connect(self.filtter_logs_i)
-        action_menu.addAction(clear_action)
+        filter_action = QAction("Level_I", self)
+        filter_action.setShortcut('Ctrl+I')
+        filter_action.triggered.connect(self.filter_logs_i)
+        action.addAction(filter_action)
 
-        clear_action = QAction("Level_W", self)
-        clear_action.setShortcut('Ctrl+W')
-        clear_action.triggered.connect(self.filtter_logs_w)
-        action_menu.addAction(clear_action)
+        filter_action = QAction("Level_W", self)
+        filter_action.setShortcut('Ctrl+W')
+        filter_action.triggered.connect(self.filter_logs_w)
+        action.addAction(filter_action)
 
-        clear_action = QAction("Level_E", self)
-        clear_action.setShortcut('Ctrl+E')
-        clear_action.triggered.connect(self.filtter_logs_e)
-        action_menu.addAction(clear_action)
-        menu_bar.addMenu(action_menu)
+        filter_action = QAction("Level_E", self)
+        filter_action.setShortcut('Ctrl+E')
+        filter_action.triggered.connect(self.filter_logs_e)
+        action.addAction(filter_action)
 
-    def clear_list(self):
-        self.list_widget.clear()
-
-    def add_line(self):
-        self.list_widget.addItem("-" * 40)
+        keyboard.add_hotkey('Ctrl+O', self.log_show_origin)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -84,52 +79,79 @@ class MainWindow(QMainWindow):
                 self.log_reader.concurrency([file])
             except:
                 item = QListWidgetItem(traceback.format_exc())
-                item.setForeground(QColor("red"))
+                item.setForeground(QBrush(QColor("red")))
                 self.list_widget.addItem(item)
+            # for i in range(100):
+
+    def show_log_on_finish(self):
+        if len(self.data_item_logs[self.show_level]) == 0:
+            for level in range(self.show_level - 1, 0, -1):
+                if len(self.data_item_logs[level]) > 0:
+                    self.filter_logs(Level(level))
+                    return None
 
     def collect_logs_and_show(self, log: Log):
+        if log.translated is None:
+            # 文件读取到最后
+            self.show_log_on_finish()
+            return
+
         for log_level in self.data_item_logs:
             if log.level.value >= log_level:
                 self.data_item_logs[log_level].append(log)
-        if log.level.value > Level.w.value:
-            self.list_widget.addItem(log_to_list_item(log))
+        if log.level.value >= self.show_level:
+            self.list_widget.addItem(self.log_to_list_item(log))
 
-    def filtter_logs_d(self):
-        self.filtter_logs(Level.d)
+    def log_to_list_item(self, log: Log):
+        if self.show_origin:
+            log_str = log.str_with_origin()
+        else:
+            log_str = log.__str__()
+        item = QListWidgetItem(log_str)
+        item.setForeground(QBrush(QColor(log.level.color())))
+        return item
 
-    def filtter_logs_i(self):
-        self.filtter_logs(Level.i)
+    def filter_logs_d(self):
+        self.filter_logs(Level.d)
 
-    def filtter_logs_w(self):
-        self.filtter_logs(Level.w)
+    def filter_logs_i(self):
+        self.filter_logs(Level.i)
 
-    def filtter_logs_e(self):
-        self.filtter_logs(Level.e)
+    def filter_logs_w(self):
+        self.filter_logs(Level.w)
 
-    def filtter_logs(self, level: Level):
+    def filter_logs_e(self):
+        self.filter_logs(Level.e)
+
+    def log_show_origin(self):
+        self.show_origin = not self.show_origin
+        self.filter_logs(Level(self.show_level))
+
+    def filter_logs(self, level: Level):
+        self.show_level = level.value
         first = self.list_widget.item(0).text()
         self.list_widget.clear()
         self.list_widget.addItem(first)
-        show_logs = self.data_item_logs[level.value]
+        show_logs = self.data_item_logs[self.show_level]
         for log in show_logs:
-            self.list_widget.addItem(log_to_list_item(log))
+            self.list_widget.addItem(self.log_to_list_item(log))
 
 
 if __name__ == "__main__":
-    app = QApplication([])
-    window = MainWindow()
+    app = QApplication(sys.argv)
+    window = PyQt6Window()
     window.show()
-    app.exec()
+    sys.exit(app.exec())
 
 #  打包命令
-# pyinstaller --name=log_translator --onefile --windowed ui_pyside2.py
+# pyinstaller --name=log_translator --onefile --windowed ui_pyqt6.py
 # -F, --onefile   产生单个的可执行文件
 # -n NAME, --name NAME   指定项目（产生的 spec）名字。如果省略该选项，那么第一个脚本的主文件名将作为 spec 的名字
 # -w, --windowed, --noconsole   指定程序运行时不显示命令行窗口（仅对 Windows 有效）
 # -i <FILE.ico>, --icon <FILE.ico>  指定icon
 
 #  打包执行以下命令
-# pyinstaller --hidden-import -n log_translator -F -w -i tools.ico ui_pyside2.py
+# pyinstaller -n log_translator --hidden-import config -F -w -i tools.ico ui_pyqt6.py
 # --hidden-import 设置导入要动态加载的类 因为没被引用 所以不会导入需要手动设置
 
 # pip install PyInstaller

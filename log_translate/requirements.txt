@@ -1,0 +1,6 @@
+setuptools~=65.5.1
+keyboard~=0.13.5
+PyQt6~=6.5.1
+PySide6~=6.5.1.1
+typer~=0.9.0
+Rx~=3.2.0

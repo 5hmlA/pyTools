@@ -1,0 +1,6 @@
+/log_translate/venv/
+/*/venv/*
+venv/*
+/*/dist/
+/*/build/
+/*/.idea
