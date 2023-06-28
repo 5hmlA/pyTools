@@ -8,7 +8,7 @@ ICON_PATH = 'res/*.ico'
 
 setup(
     name='LogTranslate',
-    version='1.0',
+    version='1.1',
     author='5hmlA',
     author_email='jonas.jzy@gmail.com',
     # 指定运行时需要的Python版本
@@ -47,6 +47,7 @@ setup(
 )
 
 # python -m pip install --upgrade twine
+# pip install wheel setuptools
 # python setup.py sdist bdist_wheel
 
 # 发布到测试地址
