@@ -3,7 +3,7 @@ import traceback
 
 import keyboard as keyboard
 import pkg_resources
-from PyQt6.QtGui import QAction, QBrush, QColor, QIcon
+from PyQt6.QtGui import QAction, QBrush, QColor, QIcon, QFont
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
 
 from log_translate.data_struct import Log, Level
@@ -60,6 +60,8 @@ class PyQt6Window(QMainWindow):
         action.addAction(filter_action)
 
         keyboard.add_hotkey('Ctrl+O', self.log_show_origin)
+        keyboard.add_hotkey('Ctrl+Up', self.font_zoom_in)
+        keyboard.add_hotkey('Ctrl+Down', self.font_zoom_out)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -126,6 +128,20 @@ class PyQt6Window(QMainWindow):
     def log_show_origin(self):
         self.show_origin = not self.show_origin
         self.filter_logs(Level(self.show_level))
+
+    # 字体缩小
+    def font_zoom_out(self):
+        font: QFont = self.list_widget.font()
+        new_font = QFont()
+        new_font.setPointSize(font.pointSize() - 1)
+        self.list_widget.setFont(new_font)
+
+    # 字体放大
+    def font_zoom_in(self):
+        font: QFont = self.list_widget.font()
+        new_font = QFont()
+        new_font.setPointSize(font.pointSize() + 1)
+        self.list_widget.setFont(new_font)
 
     def filter_logs(self, level: Level):
         self.show_level = level.value

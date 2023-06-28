@@ -3,8 +3,8 @@ import traceback
 
 import keyboard as keyboard
 import pkg_resources
-from PySide6.QtGui import QColor, QAction, QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
+from PySide6.QtGui import QIcon, QFont, QAction, QColor
+from PySide6.QtWidgets import QMainWindow, QListWidget, QAbstractItemView, QApplication, QListWidgetItem
 
 from log_translate.data_struct import Log, Level
 from log_translate.read_log_file import LogReader
@@ -13,7 +13,7 @@ from log_translate.read_log_file import LogReader
 class PySide6Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(" 🤖日志解析")
+        self.setWindowTitle("🤖日志解析")
         ico = pkg_resources.resource_filename('log_translate', 'res/log_logo.ico')
         self.setWindowIcon(QIcon(ico))
         self.list_widget = QListWidget()
@@ -60,6 +60,8 @@ class PySide6Window(QMainWindow):
         action.addAction(filter_action)
 
         keyboard.add_hotkey('Ctrl+O', self.log_show_origin)
+        keyboard.add_hotkey('Ctrl+Up', self.font_zoom_in)
+        keyboard.add_hotkey('Ctrl+Down', self.font_zoom_out)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -127,6 +129,20 @@ class PySide6Window(QMainWindow):
         self.show_origin = not self.show_origin
         self.filter_logs(Level(self.show_level))
 
+    # 字体缩小
+    def font_zoom_out(self):
+        font: QFont = self.list_widget.font()
+        new_font = QFont()
+        new_font.setPointSize(font.pointSize() - 1)
+        self.list_widget.setFont(new_font)
+
+    # 字体放大
+    def font_zoom_in(self):
+        font: QFont = self.list_widget.font()
+        new_font = QFont()
+        new_font.setPointSize(font.pointSize() + 1)
+        self.list_widget.setFont(new_font)
+
     def filter_logs(self, level: Level):
         self.show_level = level.value
         first = self.list_widget.item(0).text()
@@ -144,36 +160,14 @@ if __name__ == "__main__":
     sys.exit(app.exec())
 
 #  打包命令
-# pyinstaller --name=log_translator --onefile --windowed ui_pyqt6.py
+# pyinstaller --name=log_translator --onefile --windowed ui_PySide6.py
 # -F, --onefile   产生单个的可执行文件
 # -n NAME, --name NAME   指定项目（产生的 spec）名字。如果省略该选项，那么第一个脚本的主文件名将作为 spec 的名字
 # -w, --windowed, --noconsole   指定程序运行时不显示命令行窗口（仅对 Windows 有效）
 # -i <FILE.ico>, --icon <FILE.ico>  指定icon
 
 #  打包执行以下命令
-# pyinstaller -n log_translator --hidden-import config -F -w -i tools.ico ui_pyqt6.py
-# --hidden-import 设置导入要动态加载的类 因为没被引用 所以不会导入需要手动设置
-
-# pip install PyInstaller
-# pyinstaller --name=<your_exe_name> --onefile --windowed --add-data "<your_data_folder>;<your_data_folder>" <your_script_name>.py
-
-# 上述命令中的选项说明：
-# --name: 可执行文件名称。
-# --onefile: 将整个项目打包为一个单独的可执行文件。
-# --windowed: 隐藏控制台窗口，将打包的应用程序显示为GUI应用程序。
-# --add-data: 添加项目资源，支持文件夹和文件，前面是资源路径，后面是输出路径，用分号进行分割。
-# 执行上述命令后，会在项目目录下生成一个.spec文件，这个文件会告诉PyInstaller如何将项目打包成exe文件。
-
-
-#  打包命令
-# pyinstaller --name=log_translator --onefile --windowed ui_pyside2.py
-# -F, --onefile   产生单个的可执行文件
-# -n NAME, --name NAME   指定项目（产生的 spec）名字。如果省略该选项，那么第一个脚本的主文件名将作为 spec 的名字
-# -w, --windowed, --noconsole   指定程序运行时不显示命令行窗口（仅对 Windows 有效）
-# -i <FILE.ico>, --icon <FILE.ico>  指定icon
-
-#  打包执行以下命令
-# pyinstaller --hidden-import -n log_translator -F -w -i tools.ico ui_pyside2.py
+# pyinstaller -n log_translator --hidden-import config -F -w -i tools.ico ui_PySide6.py
 # --hidden-import 设置导入要动态加载的类 因为没被引用 所以不会导入需要手动设置
 
 # pip install PyInstaller
