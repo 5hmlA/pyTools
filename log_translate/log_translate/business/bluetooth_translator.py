@@ -7,7 +7,7 @@ class SecTagDemoTranslator(SecStrTagTranslator):
         super().__init__("DFJ",
                          lambda string: re.search(r"(?P<tag>.*?) *:(?P<msg>.*)", string),
                          [
-                             SysLogTranslator({
+                             TagStrTranslator({
                                  "sec_tag": self.new_tag
                              })
                          ])
