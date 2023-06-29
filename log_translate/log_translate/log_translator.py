@@ -12,7 +12,7 @@ class TagPatternTranslator(object):
 
     def translate(self, tag, msg):
         for pattern in self.pattern_translators:
-            match = re.compile(pattern, re.IGNORECASE).match(tag)
+            match = re.compile(pattern, re.IGNORECASE).fullmatch(tag)
             if match:
                 translator = self.pattern_translators[pattern]
                 if callable(translator):
@@ -38,7 +38,7 @@ class TagStrTranslator(object):
         return None
 
 
-class SecStrTagTranslator(TagStrTranslator):
+class SubTagTranslator(TagPatternTranslator):
     """
     :param father表示上一级tag
     :param tag_from_str_fun 从字符串解析tag的方法
@@ -47,12 +47,12 @@ class SecStrTagTranslator(TagStrTranslator):
 
     def __init__(self, father, tag_from_str_fun, tag_translators):
         super().__init__({
-            father: self.translate_new_tag
+            father: self.translate_sub_tag
         })
         self.tag_from_str_fun = tag_from_str_fun
         self.tag_translators = tag_translators
 
-    def translate_new_tag(self, msg):
+    def translate_sub_tag(self, msg):
         log = self.tag_from_str_fun(msg)
         if log:
             sec_tag = log.group("tag")
@@ -124,3 +124,5 @@ if __name__ == '__main__':
     f = re.search(r"(?P<time>\d+.*\.\d{3,}) +(?P<pid>\d+).* [A-Z] (?P<tag>.*?) *:(?P<msg>.*)", str)
     print(f.group("pid"))
     print(f.group("tag"))
+
+    print(re.compile("testb", re.IGNORECASE).fullmatch("testb").group())

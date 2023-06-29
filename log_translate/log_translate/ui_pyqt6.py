@@ -62,6 +62,7 @@ class PyQt6Window(QMainWindow):
         keyboard.add_hotkey('Ctrl+O', self.log_show_origin)
         keyboard.add_hotkey('Ctrl+Up', self.font_zoom_in)
         keyboard.add_hotkey('Ctrl+Down', self.font_zoom_out)
+        keyboard.add_hotkey('Ctrl+R', self.log_clear)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -129,6 +130,15 @@ class PyQt6Window(QMainWindow):
         self.show_origin = not self.show_origin
         self.filter_logs(Level(self.show_level))
 
+    def filter_logs(self, level: Level):
+        self.show_level = level.value
+        first = self.list_widget.item(0).text()
+        self.list_widget.clear()
+        self.list_widget.addItem(first)
+        show_logs = self.data_item_logs[self.show_level]
+        for log in show_logs:
+            self.list_widget.addItem(self.log_to_list_item(log))
+
     # 字体缩小
     def font_zoom_out(self):
         font: QFont = self.list_widget.font()
@@ -143,14 +153,14 @@ class PyQt6Window(QMainWindow):
         new_font.setPointSize(font.pointSize() + 1)
         self.list_widget.setFont(new_font)
 
-    def filter_logs(self, level: Level):
-        self.show_level = level.value
-        first = self.list_widget.item(0).text()
-        self.list_widget.clear()
-        self.list_widget.addItem(first)
-        show_logs = self.data_item_logs[self.show_level]
-        for log in show_logs:
-            self.list_widget.addItem(self.log_to_list_item(log))
+    # 清空缓存
+    def log_clear(self):
+        self.data_item_logs = {
+            Level.d.value: [],
+            Level.i.value: [],
+            Level.w.value: [],
+            Level.e.value: [],
+        }
 
 
 if __name__ == "__main__":
