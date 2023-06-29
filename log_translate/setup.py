@@ -8,7 +8,7 @@ ICON_PATH = 'res/*.ico'
 
 setup(
     name='LogTranslate',
-    version='1.1',
+    version='1.2',
     author='5hmlA',
     author_email='jonas.jzy@gmail.com',
     # 指定运行时需要的Python版本
