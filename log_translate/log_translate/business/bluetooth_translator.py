@@ -1,8 +1,11 @@
+import re
+
 from log_translate.data_struct import Log, Level
-from log_translate.log_translator import *
+
+from log_translate.log_translator import SubTagTranslator, TagStrTranslator
 
 
-class SecTagDemoTranslator(SecStrTagTranslator):
+class SecTagDemoTranslator(SubTagTranslator):
     def __init__(self):
         super().__init__("DFJ",
                          lambda string: re.search(r"(?P<tag>.*?) *:(?P<msg>.*)", string),
