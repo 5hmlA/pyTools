@@ -52,7 +52,7 @@ class SubTagTranslator(TagPatternTranslator):
         self.tag_from_str_fun = tag_from_str_fun
         self.tag_translators = tag_translators
 
-    def translate_sub_tag(self, msg):
+    def translate_sub_tag(self, tag, msg):
         log = self.tag_from_str_fun(msg)
         if log:
             sec_tag = log.group("tag")
