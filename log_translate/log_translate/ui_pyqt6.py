@@ -3,6 +3,7 @@ import traceback
 
 import keyboard as keyboard
 import pkg_resources
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QBrush, QColor, QIcon, QFont
 from PyQt6.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QAbstractItemView
 
@@ -14,6 +15,8 @@ class PyQt6Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("🤖日志解析")
+        # 设置窗口标志位为 Qt.WindowStaysOnTopHint
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         ico = pkg_resources.resource_filename('log_translate', 'res/log_logo.ico')
         self.setWindowIcon(QIcon(ico))
         self.list_widget = QListWidget()
